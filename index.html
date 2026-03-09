@@ -1,83 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Supabase Test</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OTP Supabase</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
+  <h2>Connexion par code</h2>
 
-<h2>Test Supabase</h2>
+  <input id="email" type="email" placeholder="Email" />
+  <button id="sendCodeBtn">Envoyer le code</button>
 
-<input id="email" placeholder="email"><br><br>
-<input id="password" type="password" placeholder="password"><br><br>
+  <br><br>
 
-<button onclick="create()">Créer compte</button>
-<button onclick="login()">Connexion</button>
-<button onclick="logout()">Logout</button>
+  <input id="code" type="text" placeholder="Code reçu par email" />
+  <button id="verifyBtn">Valider le code</button>
 
-<p id="status">Chargé</p>
+  <p id="status">Prêt</p>
 
-<script>
+  <script>
+    const SUPABASE_URL = "https://ymuoiyfyvqpxokndhsuz.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_LVVb8iWlaJAuMa4D_LLiYg_DTe2KpyY";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const SUPABASE_URL = "https://ymuoiyfyvqpxokndhsuz.supabase.co";
-const SUPABASE_KEY = "sb_publishable_LVVb8iWlaJAuMa4D_LLiYg_DTe2KpyY";
+    const statusEl = document.getElementById("status");
 
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    function setStatus(text) {
+      statusEl.textContent = text;
+    }
 
-function setStatus(t){
-document.getElementById("status").innerText = t;
-}
+    document.getElementById("sendCodeBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      if (!email) {
+        setStatus("Entre un email.");
+        return;
+      }
 
-async function create(){
+      setStatus("Envoi du code...");
 
-setStatus("Création...");
+      const { error } = await client.auth.signInWithOtp({
+        email: email
+      });
 
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+      if (error) {
+        setStatus("Erreur : " + error.message);
+        return;
+      }
 
-const {error} = await client.auth.signUp({
-email: email,
-password: password
-});
+      setStatus("Code envoyé par email.");
+    });
 
-if(error){
-setStatus(error.message);
-}else{
-setStatus("Compte créé");
-}
+    document.getElementById("verifyBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const code = document.getElementById("code").value.trim();
 
-}
+      if (!email || !code) {
+        setStatus("Entre l'email et le code.");
+        return;
+      }
 
-async function login(){
+      setStatus("Vérification...");
 
-setStatus("Connexion...");
+      const { error } = await client.auth.verifyOtp({
+        email: email,
+        token: code,
+        type: "email"
+      });
 
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+      if (error) {
+        setStatus("Erreur : " + error.message);
+        return;
+      }
 
-const {error} = await client.auth.signInWithPassword({
-email: email,
-password: password
-});
-
-if(error){
-setStatus(error.message);
-}else{
-setStatus("Connecté");
-}
-
-}
-
-async function logout(){
-
-await client.auth.signOut();
-setStatus("Déconnecté");
-
-}
-
-</script>
-
+      setStatus("Connecté avec succès.");
+    });
+  </script>
 </body>
 </html>
