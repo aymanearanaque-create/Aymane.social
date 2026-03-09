@@ -3,419 +3,385 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aymane Social</title>
+  <title>Aymane Social - Messagerie</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root{
-      --bg:#0a0a0f;
-      --card:#13131a;
-      --card2:#1c1c28;
-      --border:#2a2a3d;
-      --accent:#7c6af7;
-      --accent2:#f76a8a;
-      --text:#f0eeff;
-      --muted:#9896b8;
-      --ok:#6af7c4;
-      --err:#ff7b9c;
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      margin: 0;
+      padding: 20px;
     }
 
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
+    .box {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #1b1b1b;
+      border-radius: 16px;
+      padding: 20px;
     }
 
-    body{
-      min-height:100vh;
-      font-family:Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(124,106,247,.18), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(247,106,138,.12), transparent 28%),
-        var(--bg);
-      color:var(--text);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
+    h1, h2 {
+      margin-top: 0;
     }
 
-    .card{
-      width:100%;
-      max-width:430px;
-      background:rgba(19,19,26,.96);
-      border:1px solid var(--border);
-      border-radius:24px;
-      padding:28px 22px;
-      box-shadow:0 20px 60px rgba(0,0,0,.35);
-      backdrop-filter:blur(10px);
+    input, textarea, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      font-size: 16px;
+      box-sizing: border-box;
     }
 
-    .logo{
-      text-align:center;
-      margin-bottom:22px;
+    textarea {
+      min-height: 100px;
+      resize: vertical;
     }
 
-    .logo h1{
-      font-size:34px;
-      line-height:1;
-      font-weight:800;
-      letter-spacing:.3px;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      background-clip:text;
+    button {
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
 
-    .logo p{
-      margin-top:8px;
-      color:var(--muted);
-      font-size:14px;
+    button:hover {
+      opacity: 0.95;
     }
 
-    .tabs{
-      display:flex;
-      gap:6px;
-      background:var(--card2);
-      border-radius:14px;
-      padding:4px;
-      margin-bottom:18px;
+    .hidden {
+      display: none;
     }
 
-    .tab{
-      flex:1;
-      border:none;
-      background:transparent;
-      color:var(--muted);
-      padding:11px 10px;
-      border-radius:10px;
-      font-weight:700;
-      cursor:pointer;
-      transition:.2s;
+    .msg {
+      background: #222;
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 12px;
     }
 
-    .tab.active{
-      background:var(--accent);
-      color:#fff;
+    .small {
+      color: #aaa;
+      font-size: 13px;
     }
 
-    .group{
-      margin-bottom:14px;
+    .status {
+      margin-top: 12px;
+      color: #ffd166;
+      min-height: 22px;
     }
 
-    label{
-      display:block;
-      margin-bottom:7px;
-      color:var(--muted);
-      font-size:13px;
-      font-weight:700;
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
     }
 
-    input{
-      width:100%;
-      padding:14px 14px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:var(--card2);
-      color:var(--text);
-      outline:none;
-      font-size:15px;
-      transition:.2s;
-    }
-
-    input:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(124,106,247,.16);
-    }
-
-    .btn{
-      width:100%;
-      border:none;
-      border-radius:14px;
-      padding:14px;
-      font-size:15px;
-      font-weight:800;
-      cursor:pointer;
-      transition:.2s;
-    }
-
-    .btn-primary{
-      background:linear-gradient(135deg,var(--accent),#6552f0);
-      color:#fff;
-      margin-top:6px;
-    }
-
-    .btn-primary:active{
-      transform:scale(.99);
-    }
-
-    .btn-secondary{
-      background:var(--card2);
-      color:var(--text);
-      border:1px solid var(--border);
-      margin-top:10px;
-    }
-
-    .hidden{
-      display:none;
-    }
-
-    .status{
-      min-height:22px;
-      margin-top:16px;
-      text-align:center;
-      font-size:14px;
-      color:var(--muted);
-      word-break:break-word;
-    }
-
-    .status.ok{
-      color:var(--ok);
-    }
-
-    .status.err{
-      color:var(--err);
-    }
-
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom:18px;
-      padding-bottom:14px;
-      border-bottom:1px solid var(--border);
-    }
-
-    .welcome{
-      font-size:14px;
-      color:var(--muted);
-    }
-
-    .small-btn{
-      width:auto;
-      padding:10px 14px;
-      border:none;
-      border-radius:12px;
-      background:var(--card2);
-      color:var(--text);
-      font-weight:700;
-      cursor:pointer;
-      border:1px solid var(--border);
+    .topbar button {
+      width: auto;
+      padding: 10px 16px;
     }
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="box">
     <div id="authView">
-      <div class="logo">
-        <h1>Aymane Social</h1>
-        <p>Connexion simple avec Supabase</p>
-      </div>
+      <h1>Aymane Social</h1>
+      <p>Inscription avec pseudo + messagerie par pseudo</p>
 
-      <div class="tabs">
-        <button id="tabLogin" class="tab active" type="button">Connexion</button>
-        <button id="tabSignup" class="tab" type="button">Inscription</button>
-      </div>
+      <h2>Inscription</h2>
+      <input id="signupUsername" placeholder="Pseudo (ex: aymane)" />
+      <input id="signupEmail" type="email" placeholder="Email" />
+      <input id="signupPassword" type="password" placeholder="Mot de passe" />
+      <button id="signupBtn">Créer un compte</button>
 
-      <div id="loginBox">
-        <div class="group">
-          <label for="loginEmail">Email</label>
-          <input id="loginEmail" type="email" placeholder="vous@exemple.com">
-        </div>
+      <h2>Connexion</h2>
+      <input id="loginEmail" type="email" placeholder="Email" />
+      <input id="loginPassword" type="password" placeholder="Mot de passe" />
+      <button id="loginBtn">Se connecter</button>
 
-        <div class="group">
-          <label for="loginPassword">Mot de passe</label>
-          <input id="loginPassword" type="password" placeholder="••••••••">
-        </div>
-
-        <button id="loginBtn" class="btn btn-primary" type="button">Se connecter</button>
-      </div>
-
-      <div id="signupBox" class="hidden">
-        <div class="group">
-          <label for="signupEmail">Email</label>
-          <input id="signupEmail" type="email" placeholder="vous@exemple.com">
-        </div>
-
-        <div class="group">
-          <label for="signupPassword">Mot de passe</label>
-          <input id="signupPassword" type="password" placeholder="••••••••">
-        </div>
-
-        <button id="signupBtn" class="btn btn-primary" type="button">Créer un compte</button>
-      </div>
-
-      <p id="authStatus" class="status">Prêt</p>
+      <div id="authStatus" class="status">Prêt</div>
     </div>
 
     <div id="appView" class="hidden">
       <div class="topbar">
         <div>
-          <div style="font-size:20px;font-weight:800;">Aymane Social</div>
-          <div id="userEmail" class="welcome">Connecté</div>
+          <h1>Messagerie</h1>
+          <div id="meInfo" class="small"></div>
         </div>
-        <button id="logoutBtn" class="small-btn" type="button">Déconnexion</button>
+        <button id="logoutBtn">Déconnexion</button>
       </div>
 
-      <p style="line-height:1.6;color:var(--text);">
-        Tu es connecté. Prochaine étape : ajouter les posts, les likes, les commentaires et la messagerie.
-      </p>
+      <h2>Envoyer un message</h2>
+      <input id="receiverUsername" placeholder="Pseudo du destinataire" />
+      <textarea id="messageContent" placeholder="Ton message..."></textarea>
+      <button id="sendBtn">Envoyer</button>
 
-      <p id="appStatus" class="status"></p>
+      <div id="appStatus" class="status"></div>
+
+      <h2>Messages</h2>
+      <button id="refreshBtn">Actualiser</button>
+      <div id="messagesList"></div>
     </div>
   </div>
 
   <script>
     const SUPABASE_URL = "https://ymuoiyfyvqpxokndhsuz.supabase.co";
     const SUPABASE_KEY = "sb_publishable_LVVb8iWlaJAuMa4D_LLiYg_DTe2KpyY";
-
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let currentProfile = null;
 
     const authView = document.getElementById("authView");
     const appView = document.getElementById("appView");
-
-    const loginBox = document.getElementById("loginBox");
-    const signupBox = document.getElementById("signupBox");
-
-    const tabLogin = document.getElementById("tabLogin");
-    const tabSignup = document.getElementById("tabSignup");
-
     const authStatus = document.getElementById("authStatus");
     const appStatus = document.getElementById("appStatus");
-    const userEmail = document.getElementById("userEmail");
+    const meInfo = document.getElementById("meInfo");
+    const messagesList = document.getElementById("messagesList");
 
-    function setStatus(el, message, type = "") {
-      el.textContent = message;
-      el.className = "status";
-      if (type) el.classList.add(type);
+    function setAuthStatus(text) {
+      authStatus.textContent = text;
     }
 
-    function showLogin() {
-      loginBox.classList.remove("hidden");
-      signupBox.classList.add("hidden");
-      tabLogin.classList.add("active");
-      tabSignup.classList.remove("active");
-      setStatus(authStatus, "Prêt");
-    }
-
-    function showSignup() {
-      signupBox.classList.remove("hidden");
-      loginBox.classList.add("hidden");
-      tabSignup.classList.add("active");
-      tabLogin.classList.remove("active");
-      setStatus(authStatus, "Prêt");
-    }
-
-    function showApp(email) {
-      authView.classList.add("hidden");
-      appView.classList.remove("hidden");
-      userEmail.textContent = email ? "Connecté : " + email : "Connecté";
-      setStatus(appStatus, "Session active", "ok");
+    function setAppStatus(text) {
+      appStatus.textContent = text;
     }
 
     function showAuth() {
-      appView.classList.add("hidden");
       authView.classList.remove("hidden");
-      setStatus(authStatus, "Prêt");
+      appView.classList.add("hidden");
     }
 
-    tabLogin.addEventListener("click", showLogin);
-    tabSignup.addEventListener("click", showSignup);
+    function showApp() {
+      authView.classList.add("hidden");
+      appView.classList.remove("hidden");
+    }
 
-    document.getElementById("signupBtn").addEventListener("click", async function () {
-      const email = document.getElementById("signupEmail").value.trim();
-      const password = document.getElementById("signupPassword").value;
+    async function loadMyProfile() {
+      const { data, error } = await client
+        .from("profiles")
+        .select("*")
+        .eq("id", currentUser.id)
+        .maybeSingle();
 
-      if (!email || !password) {
-        setStatus(authStatus, "Remplis tous les champs.", "err");
+      if (error) {
+        setAppStatus("Erreur profil : " + error.message);
         return;
       }
 
-      setStatus(authStatus, "Création du compte...");
+      currentProfile = data;
+      meInfo.textContent = "Connecté : @" + currentProfile.username + " • " + currentUser.email;
+    }
 
-      try {
-        const { error } = await client.auth.signUp({
-          email: email,
-          password: password
-        });
+    async function signup() {
+      const username = document.getElementById("signupUsername").value.trim().toLowerCase();
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
 
-        if (error) {
-          setStatus(authStatus, "Erreur : " + error.message, "err");
-          return;
-        }
-
-        setStatus(authStatus, "Compte créé. Vérifie ton email ou connecte-toi.", "ok");
-        showLogin();
-        document.getElementById("loginEmail").value = email;
-        document.getElementById("loginPassword").value = password;
-      } catch (e) {
-        setStatus(authStatus, "Erreur JS : " + e.message, "err");
+      if (!username || !email || !password) {
+        setAuthStatus("Remplis tous les champs.");
+        return;
       }
-    });
 
-    document.getElementById("loginBtn").addEventListener("click", async function () {
+      setAuthStatus("Création du compte...");
+
+      const { data, error } = await client.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) {
+        setAuthStatus("Erreur inscription : " + error.message);
+        return;
+      }
+
+      if (!data.user) {
+        setAuthStatus("Compte créé, mais utilisateur introuvable.");
+        return;
+      }
+
+      const { error: profileError } = await client.from("profiles").insert({
+        id: data.user.id,
+        username: username
+      });
+
+      if (profileError) {
+        setAuthStatus("Erreur pseudo : " + profileError.message);
+        return;
+      }
+
+      setAuthStatus("Compte créé. Connecte-toi maintenant.");
+    }
+
+    async function login() {
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value;
 
       if (!email || !password) {
-        setStatus(authStatus, "Entre ton email et ton mot de passe.", "err");
+        setAuthStatus("Entre email et mot de passe.");
         return;
       }
 
-      setStatus(authStatus, "Connexion...");
+      setAuthStatus("Connexion...");
 
-      try {
-        const { error } = await client.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
+      const { error } = await client.auth.signInWithPassword({
+        email,
+        password
+      });
 
-        if (error) {
-          setStatus(authStatus, "Erreur : " + error.message, "err");
-          return;
-        }
-
-        setStatus(authStatus, "Connecté", "ok");
-      } catch (e) {
-        setStatus(authStatus, "Erreur JS : " + e.message, "err");
+      if (error) {
+        setAuthStatus("Erreur connexion : " + error.message);
+        return;
       }
-    });
 
-    document.getElementById("logoutBtn").addEventListener("click", async function () {
-      try {
-        const { error } = await client.auth.signOut();
+      setAuthStatus("Connecté.");
+    }
 
-        if (error) {
-          setStatus(appStatus, "Erreur : " + error.message, "err");
-          return;
-        }
+    async function logout() {
+      await client.auth.signOut();
+      currentUser = null;
+      currentProfile = null;
+      showAuth();
+      setAuthStatus("Déconnecté.");
+    }
 
-        showAuth();
-      } catch (e) {
-        setStatus(appStatus, "Erreur JS : " + e.message, "err");
+    async function sendMessage() {
+      const receiverUsername = document.getElementById("receiverUsername").value.trim().toLowerCase();
+      const content = document.getElementById("messageContent").value.trim();
+
+      if (!receiverUsername || !content) {
+        setAppStatus("Entre le pseudo du destinataire et le message.");
+        return;
       }
-    });
 
-    client.auth.onAuthStateChange(function (event, session) {
+      if (!currentProfile) {
+        setAppStatus("Profil non chargé.");
+        return;
+      }
+
+      if (receiverUsername === currentProfile.username) {
+        setAppStatus("Tu ne peux pas t'envoyer un message à toi-même.");
+        return;
+      }
+
+      setAppStatus("Recherche du destinataire...");
+
+      const { data: receiver, error: receiverError } = await client
+        .from("profiles")
+        .select("*")
+        .eq("username", receiverUsername)
+        .maybeSingle();
+
+      if (receiverError) {
+        setAppStatus("Erreur destinataire : " + receiverError.message);
+        return;
+      }
+
+      if (!receiver) {
+        setAppStatus("Pseudo introuvable.");
+        return;
+      }
+
+      const { error } = await client.from("messages").insert({
+        sender_id: currentUser.id,
+        receiver_id: receiver.id,
+        content: content
+      });
+
+      if (error) {
+        setAppStatus("Erreur envoi : " + error.message);
+        return;
+      }
+
+      document.getElementById("messageContent").value = "";
+      setAppStatus("Message envoyé à @" + receiver.username);
+      loadMessages();
+    }
+
+    async function loadMessages() {
+      messagesList.innerHTML = "Chargement...";
+
+      const { data, error } = await client
+        .from("messages")
+        .select("*")
+        .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        messagesList.innerHTML = "Erreur chargement : " + error.message;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        messagesList.innerHTML = "<p>Aucun message.</p>";
+        return;
+      }
+
+      const ids = [...new Set(data.flatMap(m => [m.sender_id, m.receiver_id]))];
+
+      const { data: profiles } = await client
+        .from("profiles")
+        .select("id, username")
+        .in("id", ids);
+
+      const usernameMap = {};
+      (profiles || []).forEach(p => {
+        usernameMap[p.id] = p.username;
+      });
+
+      messagesList.innerHTML = "";
+
+      data.forEach(msg => {
+        const div = document.createElement("div");
+        div.className = "msg";
+
+        const senderName = usernameMap[msg.sender_id] || "inconnu";
+        const receiverName = usernameMap[msg.receiver_id] || "inconnu";
+
+        div.innerHTML = `
+          <div class="small">De @${senderName} vers @${receiverName}</div>
+          <div>${msg.content}</div>
+          <div class="small">${new Date(msg.created_at).toLocaleString()}</div>
+        `;
+
+        messagesList.appendChild(div);
+      });
+    }
+
+    client.auth.onAuthStateChange(async (_event, session) => {
       if (session && session.user) {
-        showApp(session.user.email);
+        currentUser = session.user;
+        await loadMyProfile();
+        showApp();
+        await loadMessages();
       } else {
         showAuth();
       }
     });
 
     async function init() {
-      try {
-        const { data } = await client.auth.getSession();
-        if (data.session && data.session.user) {
-          showApp(data.session.user.email);
-        } else {
-          showAuth();
-        }
-      } catch (e) {
-        setStatus(authStatus, "Erreur init : " + e.message, "err");
+      const { data } = await client.auth.getSession();
+
+      if (data.session && data.session.user) {
+        currentUser = data.session.user;
+        await loadMyProfile();
+        showApp();
+        await loadMessages();
+      } else {
+        showAuth();
       }
     }
+
+    document.getElementById("signupBtn").addEventListener("click", signup);
+    document.getElementById("loginBtn").addEventListener("click", login);
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+    document.getElementById("sendBtn").addEventListener("click", sendMessage);
+    document.getElementById("refreshBtn").addEventListener("click", loadMessages);
 
     init();
   </script>
