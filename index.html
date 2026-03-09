@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Test Supabase</title>
+  <title>Diagnostic Supabase</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <h1>Test Supabase</h1>
+  <h1>Diagnostic Supabase</h1>
 
   <input id="email" type="email" placeholder="Email" />
   <br><br>
@@ -15,84 +15,108 @@
   <input id="password" type="password" placeholder="Mot de passe" />
   <br><br>
 
+  <button id="testBtn">Test bouton simple</button>
   <button id="signupBtn">Créer compte</button>
   <button id="loginBtn">Se connecter</button>
   <button id="logoutBtn">Se déconnecter</button>
 
-  <p id="status">Prêt</p>
+  <p id="status">Chargement...</p>
 
   <script>
-    const SUPABASE_URL = "https://ymuoiyfyvqpxokndhsuz.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_LVVb8iWlaJAuMa4D_LLiYg_DTe2KpyY";
-
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
     const statusEl = document.getElementById("status");
 
-    document.getElementById("signupBtn").addEventListener("click", async function () {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
+    function log(msg) {
+      statusEl.textContent = msg;
+      console.log(msg);
+    }
 
-      statusEl.textContent = "Création du compte...";
+    log("JS chargé");
 
-      try {
-        const { error } = await supabase.auth.signUp({
-          email: email,
-          password: password
-        });
-
-        if (error) {
-          statusEl.textContent = "Erreur inscription : " + error.message;
-          return;
-        }
-
-        statusEl.textContent = "Compte créé";
-      } catch (e) {
-        statusEl.textContent = "Erreur JS inscription : " + e.message;
-      }
+    document.getElementById("testBtn").addEventListener("click", function () {
+      log("Bouton simple OK");
+      alert("Bouton simple OK");
     });
 
-    document.getElementById("loginBtn").addEventListener("click", async function () {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-
-      statusEl.textContent = "Connexion...";
-
-      try {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
-
-        if (error) {
-          statusEl.textContent = "Erreur connexion : " + error.message;
-          return;
-        }
-
-        statusEl.textContent = "Connecté";
-      } catch (e) {
-        statusEl.textContent = "Erreur JS connexion : " + e.message;
+    try {
+      if (!window.supabase) {
+        log("ERREUR : window.supabase introuvable");
+      } else {
+        log("Lib Supabase chargée");
       }
-    });
 
-    document.getElementById("logoutBtn").addEventListener("click", async function () {
-      statusEl.textContent = "Déconnexion...";
+      const SUPABASE_URL = "https://ymuoiyfyvqpxokndhsuz.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_LVVb8iWlaJAuMa4D_LLiYg_DTe2KpyY";
 
-      try {
-        const { error } = await supabase.auth.signOut();
+      const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      log("Client Supabase créé");
 
-        if (error) {
-          statusEl.textContent = "Erreur déconnexion : " + error.message;
-          return;
+      document.getElementById("signupBtn").addEventListener("click", async function () {
+        log("Clic sur Créer compte");
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        try {
+          const { error } = await client.auth.signUp({
+            email: email,
+            password: password
+          });
+
+          if (error) {
+            log("Erreur inscription : " + error.message);
+            return;
+          }
+
+          log("Compte créé");
+        } catch (e) {
+          log("Erreur JS inscription : " + e.message);
         }
+      });
 
-        statusEl.textContent = "Déconnecté";
-      } catch (e) {
-        statusEl.textContent = "Erreur JS déconnexion : " + e.message;
-      }
-    });
+      document.getElementById("loginBtn").addEventListener("click", async function () {
+        log("Clic sur Se connecter");
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        try {
+          const { error } = await client.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
+
+          if (error) {
+            log("Erreur connexion : " + error.message);
+            return;
+          }
+
+          log("Connecté");
+        } catch (e) {
+          log("Erreur JS connexion : " + e.message);
+        }
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", async function () {
+        log("Clic sur Se déconnecter");
+
+        try {
+          const { error } = await client.auth.signOut();
+
+          if (error) {
+            log("Erreur déconnexion : " + error.message);
+            return;
+          }
+
+          log("Déconnecté");
+        } catch (e) {
+          log("Erreur JS déconnexion : " + e.message);
+        }
+      });
+
+      log("Tous les événements sont attachés");
+    } catch (e) {
+      log("Erreur générale : " + e.message);
+    }
   </script>
 </body>
 </html>
