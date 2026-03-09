@@ -3,78 +3,421 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OTP Supabase</title>
+  <title>Aymane Social</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg:#0a0a0f;
+      --card:#13131a;
+      --card2:#1c1c28;
+      --border:#2a2a3d;
+      --accent:#7c6af7;
+      --accent2:#f76a8a;
+      --text:#f0eeff;
+      --muted:#9896b8;
+      --ok:#6af7c4;
+      --err:#ff7b9c;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      min-height:100vh;
+      font-family:Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124,106,247,.18), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(247,106,138,.12), transparent 28%),
+        var(--bg);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .card{
+      width:100%;
+      max-width:430px;
+      background:rgba(19,19,26,.96);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:28px 22px;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
+      backdrop-filter:blur(10px);
+    }
+
+    .logo{
+      text-align:center;
+      margin-bottom:22px;
+    }
+
+    .logo h1{
+      font-size:34px;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:.3px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    .logo p{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .tabs{
+      display:flex;
+      gap:6px;
+      background:var(--card2);
+      border-radius:14px;
+      padding:4px;
+      margin-bottom:18px;
+    }
+
+    .tab{
+      flex:1;
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      padding:11px 10px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    .tab.active{
+      background:var(--accent);
+      color:#fff;
+    }
+
+    .group{
+      margin-bottom:14px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:7px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    input{
+      width:100%;
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:var(--card2);
+      color:var(--text);
+      outline:none;
+      font-size:15px;
+      transition:.2s;
+    }
+
+    input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(124,106,247,.16);
+    }
+
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      padding:14px;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),#6552f0);
+      color:#fff;
+      margin-top:6px;
+    }
+
+    .btn-primary:active{
+      transform:scale(.99);
+    }
+
+    .btn-secondary{
+      background:var(--card2);
+      color:var(--text);
+      border:1px solid var(--border);
+      margin-top:10px;
+    }
+
+    .hidden{
+      display:none;
+    }
+
+    .status{
+      min-height:22px;
+      margin-top:16px;
+      text-align:center;
+      font-size:14px;
+      color:var(--muted);
+      word-break:break-word;
+    }
+
+    .status.ok{
+      color:var(--ok);
+    }
+
+    .status.err{
+      color:var(--err);
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:18px;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .welcome{
+      font-size:14px;
+      color:var(--muted);
+    }
+
+    .small-btn{
+      width:auto;
+      padding:10px 14px;
+      border:none;
+      border-radius:12px;
+      background:var(--card2);
+      color:var(--text);
+      font-weight:700;
+      cursor:pointer;
+      border:1px solid var(--border);
+    }
+  </style>
 </head>
 <body>
-  <h2>Connexion par code</h2>
+  <div class="card">
+    <div id="authView">
+      <div class="logo">
+        <h1>Aymane Social</h1>
+        <p>Connexion simple avec Supabase</p>
+      </div>
 
-  <input id="email" type="email" placeholder="Email" />
-  <button id="sendCodeBtn">Envoyer le code</button>
+      <div class="tabs">
+        <button id="tabLogin" class="tab active" type="button">Connexion</button>
+        <button id="tabSignup" class="tab" type="button">Inscription</button>
+      </div>
 
-  <br><br>
+      <div id="loginBox">
+        <div class="group">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" placeholder="vous@exemple.com">
+        </div>
 
-  <input id="code" type="text" placeholder="Code reçu par email" />
-  <button id="verifyBtn">Valider le code</button>
+        <div class="group">
+          <label for="loginPassword">Mot de passe</label>
+          <input id="loginPassword" type="password" placeholder="••••••••">
+        </div>
 
-  <p id="status">Prêt</p>
+        <button id="loginBtn" class="btn btn-primary" type="button">Se connecter</button>
+      </div>
+
+      <div id="signupBox" class="hidden">
+        <div class="group">
+          <label for="signupEmail">Email</label>
+          <input id="signupEmail" type="email" placeholder="vous@exemple.com">
+        </div>
+
+        <div class="group">
+          <label for="signupPassword">Mot de passe</label>
+          <input id="signupPassword" type="password" placeholder="••••••••">
+        </div>
+
+        <button id="signupBtn" class="btn btn-primary" type="button">Créer un compte</button>
+      </div>
+
+      <p id="authStatus" class="status">Prêt</p>
+    </div>
+
+    <div id="appView" class="hidden">
+      <div class="topbar">
+        <div>
+          <div style="font-size:20px;font-weight:800;">Aymane Social</div>
+          <div id="userEmail" class="welcome">Connecté</div>
+        </div>
+        <button id="logoutBtn" class="small-btn" type="button">Déconnexion</button>
+      </div>
+
+      <p style="line-height:1.6;color:var(--text);">
+        Tu es connecté. Prochaine étape : ajouter les posts, les likes, les commentaires et la messagerie.
+      </p>
+
+      <p id="appStatus" class="status"></p>
+    </div>
+  </div>
 
   <script>
     const SUPABASE_URL = "https://ymuoiyfyvqpxokndhsuz.supabase.co";
     const SUPABASE_KEY = "sb_publishable_LVVb8iWlaJAuMa4D_LLiYg_DTe2KpyY";
+
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const statusEl = document.getElementById("status");
+    const authView = document.getElementById("authView");
+    const appView = document.getElementById("appView");
 
-    function setStatus(text) {
-      statusEl.textContent = text;
+    const loginBox = document.getElementById("loginBox");
+    const signupBox = document.getElementById("signupBox");
+
+    const tabLogin = document.getElementById("tabLogin");
+    const tabSignup = document.getElementById("tabSignup");
+
+    const authStatus = document.getElementById("authStatus");
+    const appStatus = document.getElementById("appStatus");
+    const userEmail = document.getElementById("userEmail");
+
+    function setStatus(el, message, type = "") {
+      el.textContent = message;
+      el.className = "status";
+      if (type) el.classList.add(type);
     }
 
-    document.getElementById("sendCodeBtn").addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-      if (!email) {
-        setStatus("Entre un email.");
+    function showLogin() {
+      loginBox.classList.remove("hidden");
+      signupBox.classList.add("hidden");
+      tabLogin.classList.add("active");
+      tabSignup.classList.remove("active");
+      setStatus(authStatus, "Prêt");
+    }
+
+    function showSignup() {
+      signupBox.classList.remove("hidden");
+      loginBox.classList.add("hidden");
+      tabSignup.classList.add("active");
+      tabLogin.classList.remove("active");
+      setStatus(authStatus, "Prêt");
+    }
+
+    function showApp(email) {
+      authView.classList.add("hidden");
+      appView.classList.remove("hidden");
+      userEmail.textContent = email ? "Connecté : " + email : "Connecté";
+      setStatus(appStatus, "Session active", "ok");
+    }
+
+    function showAuth() {
+      appView.classList.add("hidden");
+      authView.classList.remove("hidden");
+      setStatus(authStatus, "Prêt");
+    }
+
+    tabLogin.addEventListener("click", showLogin);
+    tabSignup.addEventListener("click", showSignup);
+
+    document.getElementById("signupBtn").addEventListener("click", async function () {
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
+
+      if (!email || !password) {
+        setStatus(authStatus, "Remplis tous les champs.", "err");
         return;
       }
 
-      setStatus("Envoi du code...");
+      setStatus(authStatus, "Création du compte...");
 
-      const { error } = await client.auth.signInWithOtp({
-        email: email
-      });
+      try {
+        const { error } = await client.auth.signUp({
+          email: email,
+          password: password
+        });
 
-      if (error) {
-        setStatus("Erreur : " + error.message);
-        return;
+        if (error) {
+          setStatus(authStatus, "Erreur : " + error.message, "err");
+          return;
+        }
+
+        setStatus(authStatus, "Compte créé. Vérifie ton email ou connecte-toi.", "ok");
+        showLogin();
+        document.getElementById("loginEmail").value = email;
+        document.getElementById("loginPassword").value = password;
+      } catch (e) {
+        setStatus(authStatus, "Erreur JS : " + e.message, "err");
       }
-
-      setStatus("Code envoyé par email.");
     });
 
-    document.getElementById("verifyBtn").addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-      const code = document.getElementById("code").value.trim();
+    document.getElementById("loginBtn").addEventListener("click", async function () {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
 
-      if (!email || !code) {
-        setStatus("Entre l'email et le code.");
+      if (!email || !password) {
+        setStatus(authStatus, "Entre ton email et ton mot de passe.", "err");
         return;
       }
 
-      setStatus("Vérification...");
+      setStatus(authStatus, "Connexion...");
 
-      const { error } = await client.auth.verifyOtp({
-        email: email,
-        token: code,
-        type: "email"
-      });
+      try {
+        const { error } = await client.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
 
-      if (error) {
-        setStatus("Erreur : " + error.message);
-        return;
+        if (error) {
+          setStatus(authStatus, "Erreur : " + error.message, "err");
+          return;
+        }
+
+        setStatus(authStatus, "Connecté", "ok");
+      } catch (e) {
+        setStatus(authStatus, "Erreur JS : " + e.message, "err");
       }
-
-      setStatus("Connecté avec succès.");
     });
+
+    document.getElementById("logoutBtn").addEventListener("click", async function () {
+      try {
+        const { error } = await client.auth.signOut();
+
+        if (error) {
+          setStatus(appStatus, "Erreur : " + error.message, "err");
+          return;
+        }
+
+        showAuth();
+      } catch (e) {
+        setStatus(appStatus, "Erreur JS : " + e.message, "err");
+      }
+    });
+
+    client.auth.onAuthStateChange(function (event, session) {
+      if (session && session.user) {
+        showApp(session.user.email);
+      } else {
+        showAuth();
+      }
+    });
+
+    async function init() {
+      try {
+        const { data } = await client.auth.getSession();
+        if (data.session && data.session.user) {
+          showApp(data.session.user.email);
+        } else {
+          showAuth();
+        }
+      } catch (e) {
+        setStatus(authStatus, "Erreur init : " + e.message, "err");
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>
