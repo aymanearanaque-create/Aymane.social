@@ -1,1 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aymane Social</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --surface2: #1c1c28;
+      --border: #2a2a3d;
+      --accent: #7c6af7;
+      --text: #f0eeff;
+      --text2: #9896b8;
+      --ok: #6af7c4;
+      --err: #f76a8a;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .center {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .sub {
+      text-align: center;
+      color: var(--text2);
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+
+    .tabs button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text2);
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tabs button.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      color: var(--text2);
+      font-size: 14px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    button.main {
+      width: 100%;
+      margin-top: 18px;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button.secondary {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .hidden { display: none; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .topbar h2 {
+      color: var(--accent);
+      font-size: 20px;
+    }
+
+    .hello {
+      color: var(--text2);
+      font-size: 14px;
+    }
+
+    .wrap {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+    }
+
+    .status {
+      margin-top: 14px;
+      font-size: 14px;
+      min-height: 20px;
+      text-align: center;
+      white-space: pre-wrap;
+      color: var(--text2);
+    }
+
+    .ok { color: var(--ok); }
+    .err { color: var(--err); }
+  </style>
+</head>
+<body>
+  <div id="authScreen" class="center">
+    <div class="card">
+      <h1>Aymane Social</h1>
+      <div class="sub">Connexion Supabase</div>
+
+      <div class="tabs">
+        <button id="tabLogin" class="active" type="button">Connexion</button>
+        <button id="tabSignup" type="button">Inscription</button>
+      </div>
+
+      <div id="loginBox">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="vous@exemple.com" />
+
+        <label>Mot de passe</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" />
+
+        <button class="main" id="loginBtn" type="button">Se connecter</button>
+      </div>
+
+      <div id="signupBox" class="hidden">
+        <label>Pseudo</label>
+        <input type="text" id="signupUsername" placeholder="aymane" />
+
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="vous@exemple.com" />
+
+        <label>Mot de passe</label>
+        <input type="password" id="signupPassword" placeholder="••••••••" />
+
+        <button class="main" id="signupBtn" type="button">Créer un compte</button>
+      </div>
+
+      <div class="status" id="authStatus"></div>
+    </div>
+  </div>
+
+  <div id="appScreen" class="hidden">
+    <div class="topbar">
+      <div>
+        <h2>Aymane Social</h2>
+        <div class="hello" id="helloText">Connecté</div>
+      </div>
+      <button class="secondary" id="logoutBtn" type="button">Déconnexion</button>
+    </div>
+
+    <div class="wrap">
+      <div class="profile-card">
+        <h3 style="margin-bottom:16px;">Mon profil</h3>
+
+        <label>Pseudo</label>
+        <input type="text" id="profileUsername" placeholder="aymane" />
+
+        <label>Bio</label>
+        <textarea id="profileBio" placeholder="Parlez de vous..."></textarea>
+
+        <button class="main" id="saveProfileBtn" type="button">Enregistrer le profil</button>
+
+        <div class="status" id="profileStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://ymuoiyfyvqpxokndhsuz.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_LVVb8iWlaJAuMa4D_LLiYg_DTe2KpyY";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let currentProfile = null;
+
+    function setStatus(id, text, type = "") {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text || "";
+      el.className = "status";
+      if (type) el.classList.add(type);
+    }
+
+    function showTab(tab) {
+      document.getElementById("loginBox").classList.toggle("hidden", tab !== "login");
+      document.getElementById("signupBox").classList.toggle("hidden", tab !== "signup");
+      document.getElementById("tabLogin").classList.toggle("active", tab === "login");
+      document.getElementById("tabSignup").classList.toggle("active", tab === "signup");
+      setStatus("authStatus", "");
+    }
+
+    function showAuth() {
+      document.getElementById("authScreen").classList.remove("hidden");
+      document.getElementById("appScreen").classList.add("hidden");
+    }
+
+    function showApp() {
+      document.getElementById("authScreen").classList.add("hidden");
+      document.getElementById("appScreen").classList.remove("hidden");
+    }
+
+    async function signup() {
+      const username = document.getElementById("signupUsername").value.trim();
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
+
+      if (!username || !email || !password) {
+        setStatus("authStatus", "Remplis tous les champs.", "err");
+        return;
+      }
+
+      if (password.length < 6) {
+        setStatus("authStatus", "Le mot de passe doit contenir au moins 6 caractères.", "err");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signUp({ email, password });
+
+      if (error) {
+        setStatus("authStatus", error.message, "err");
+        return;
+      }
+
+      if (data?.user) {
+        const { error: profileError } = await supabase.from("profiles").upsert({
+          id: data.user.id,
+          username,
+          bio: "",
+          avatar_url: ""
+        });
+
+        if (profileError) {
+          setStatus("authStatus", profileError.message, "err");
+          return;
+        }
+      }
+
+      setStatus("authStatus", "Compte créé. Connecte-toi maintenant.", "ok");
+      showTab("login");
+      document.getElementById("loginEmail").value = email;
+      document.getElementById("loginPassword").value = password;
+    }
+
+    async function login() {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      if (!email || !password) {
+        setStatus("authStatus", "Entre ton email et ton mot de passe.", "err");
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        setStatus("authStatus", error.message, "err");
+        return;
+      }
+
+      setStatus("authStatus", "", "");
+    }
+
+    async function logout() {
+      await supabase.auth.signOut();
+      currentUser = null;
+      currentProfile = null;
+      showAuth();
+    }
+
+    async function ensureProfile() {
+      if (!currentUser) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+
+      if (error) {
+        setStatus("profileStatus", error.message, "err");
+        return;
+      }
+
+      if (!data) {
+        const base = (currentUser.email || "user")
+          .split("@")[0]
+          .replace(/[^a-zA-Z0-9_]/g, "")
+          .slice(0, 20) || "user";
+
+        const username = base + Math.floor(Math.random() * 1000);
+
+        const { data: inserted, error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: currentUser.id,
+            username,
+            bio: "",
+            avatar_url: ""
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          setStatus("profileStatus", insertError.message, "err");
+          return;
+        }
+
+        currentProfile = inserted;
+      } else {
+        currentProfile = data;
+      }
+
+      document.getElementById("profileUsername").value = currentProfile.username || "";
+      document.getElementById("profileBio").value = currentProfile.bio || "";
+      document.getElementById("helloText").textContent = "Connecté : " + (currentProfile.username || currentUser.email);
+      setStatus("profileStatus", "", "");
+    }
+
+    async function saveProfile() {
+      if (!currentUser) return;
+
+      const username = document.getElementById("profileUsername").value.trim();
+      const bio = document.getElementById("profileBio").value.trim();
+
+      if (!username) {
+        setStatus("profileStatus", "Le pseudo est obligatoire.", "err");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          username,
+          bio
+        })
+        .eq("id", currentUser.id);
+
+      if (error) {
+        setStatus("profileStatus", error.message, "err");
+        return;
+      }
+
+      currentProfile = { ...currentProfile, username, bio };
+      document.getElementById("helloText").textContent = "Connecté : " + username;
+      setStatus("profileStatus", "Profil enregistré.", "ok");
+    }
+
+    async function init() {
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session || null;
+
+      if (session?.user) {
+        currentUser = session.user;
+        await ensureProfile();
+        showApp();
+      } else {
+        showAuth();
+      }
+
+      supabase.auth.onAuthStateChange(async (event, sessionNow) => {
+        if (event === "SIGNED_IN" && sessionNow?.user) {
+          currentUser = sessionNow.user;
+          await ensureProfile();
+          showApp();
+        }
+
+        if (event === "SIGNED_OUT") {
+          currentUser = null;
+          currentProfile = null;
+          showAuth();
+        }
+      });
+    }
+
+    document.getElementById("tabLogin").addEventListener("click", () => showTab("login"));
+    document.getElementById("tabSignup").addEventListener("click", () => showTab("signup"));
+    document.getElementById("loginBtn").addEventListener("click", login);
+    document.getElementById("signupBtn").addEventListener("click", signup);
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+    document.getElementById("saveProfileBtn").addEventListener("click", saveProfile);
+
+    init();
+  </script>
+</body>
+</html>
