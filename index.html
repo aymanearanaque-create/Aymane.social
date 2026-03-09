@@ -1,122 +1,83 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Diagnostic Supabase</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8">
+<title>Supabase Test</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
-  <h1>Diagnostic Supabase</h1>
 
-  <input id="email" type="email" placeholder="Email" />
-  <br><br>
+<h2>Test Supabase</h2>
 
-  <input id="password" type="password" placeholder="Mot de passe" />
-  <br><br>
+<input id="email" placeholder="email"><br><br>
+<input id="password" type="password" placeholder="password"><br><br>
 
-  <button id="testBtn">Test bouton simple</button>
-  <button id="signupBtn">Créer compte</button>
-  <button id="loginBtn">Se connecter</button>
-  <button id="logoutBtn">Se déconnecter</button>
+<button onclick="create()">Créer compte</button>
+<button onclick="login()">Connexion</button>
+<button onclick="logout()">Logout</button>
 
-  <p id="status">Chargement...</p>
+<p id="status">Chargé</p>
 
-  <script>
-    const statusEl = document.getElementById("status");
+<script>
 
-    function log(msg) {
-      statusEl.textContent = msg;
-      console.log(msg);
-    }
+const SUPABASE_URL = "https://ymuoiyfyvqpxokndhsuz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_LVVb8iWlaJAuMa4D_LLiYg_DTe2KpyY";
 
-    log("JS chargé");
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    document.getElementById("testBtn").addEventListener("click", function () {
-      log("Bouton simple OK");
-      alert("Bouton simple OK");
-    });
+function setStatus(t){
+document.getElementById("status").innerText = t;
+}
 
-    try {
-      if (!window.supabase) {
-        log("ERREUR : window.supabase introuvable");
-      } else {
-        log("Lib Supabase chargée");
-      }
+async function create(){
 
-      const SUPABASE_URL = "https://ymuoiyfyvqpxokndhsuz.supabase.co";
-      const SUPABASE_KEY = "sb_publishable_LVVb8iWlaJAuMa4D_LLiYg_DTe2KpyY";
+setStatus("Création...");
 
-      const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      log("Client Supabase créé");
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
 
-      document.getElementById("signupBtn").addEventListener("click", async function () {
-        log("Clic sur Créer compte");
+const {error} = await client.auth.signUp({
+email: email,
+password: password
+});
 
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
+if(error){
+setStatus(error.message);
+}else{
+setStatus("Compte créé");
+}
 
-        try {
-          const { error } = await client.auth.signUp({
-            email: email,
-            password: password
-          });
+}
 
-          if (error) {
-            log("Erreur inscription : " + error.message);
-            return;
-          }
+async function login(){
 
-          log("Compte créé");
-        } catch (e) {
-          log("Erreur JS inscription : " + e.message);
-        }
-      });
+setStatus("Connexion...");
 
-      document.getElementById("loginBtn").addEventListener("click", async function () {
-        log("Clic sur Se connecter");
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
 
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
+const {error} = await client.auth.signInWithPassword({
+email: email,
+password: password
+});
 
-        try {
-          const { error } = await client.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
+if(error){
+setStatus(error.message);
+}else{
+setStatus("Connecté");
+}
 
-          if (error) {
-            log("Erreur connexion : " + error.message);
-            return;
-          }
+}
 
-          log("Connecté");
-        } catch (e) {
-          log("Erreur JS connexion : " + e.message);
-        }
-      });
+async function logout(){
 
-      document.getElementById("logoutBtn").addEventListener("click", async function () {
-        log("Clic sur Se déconnecter");
+await client.auth.signOut();
+setStatus("Déconnecté");
 
-        try {
-          const { error } = await client.auth.signOut();
+}
 
-          if (error) {
-            log("Erreur déconnexion : " + error.message);
-            return;
-          }
+</script>
 
-          log("Déconnecté");
-        } catch (e) {
-          log("Erreur JS déconnexion : " + e.message);
-        }
-      });
-
-      log("Tous les événements sont attachés");
-    } catch (e) {
-      log("Erreur générale : " + e.message);
-    }
-  </script>
 </body>
 </html>
